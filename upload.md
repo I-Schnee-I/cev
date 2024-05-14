@@ -71,3 +71,53 @@ Directly connect to the webshell management tool through the following address
 http://localhost/employee_gatepass/uploads/1715653620_1234.php
 
 ![image](https://github.com/I-Schnee-I/cev/assets/58547398/4db9fcea-464b-4d48-b8e4-b4f726cff3c9)
+
+## code analysis:
+
+In the save_susers() method, the upload point directly uploads to the target server without any filtering on the upload suffix.
+```
+public function save_susers(){
+		extract($_POST);
+		$data = "";
+		foreach($_POST as $k => $v){
+			if(!in_array($k, array('id','password'))){
+				if(!empty($data)) $data .= ", ";
+				$data .= " `{$k}` = '{$v}' ";
+			}
+		}
+
+			if(!empty($password))
+			$data .= ", `password` = '".md5($password)."' ";
+		
+			if(isset($_FILES['img']) && $_FILES['img']['tmp_name'] != ''){
+				$fname = 'uploads/'.strtotime(date('y-m-d H:i')).'_'.$_FILES['img']['name'];
+				$move = move_uploaded_file($_FILES['img']['tmp_name'],'../'. $fname);
+				if($move){
+					$data .=" , avatar = '{$fname}' ";
+					if(isset($_SESSION['userdata']['avatar']) && is_file('../'.$_SESSION['userdata']['avatar']))
+						unlink('../'.$_SESSION['userdata']['avatar']);
+				}
+			}
+			$sql = "UPDATE students set {$data} where id = $id";
+			$save = $this->conn->query($sql);
+
+			if($save){
+			$this->settings->set_flashdata('success','User Details successfully updated.');
+			foreach($_POST as $k => $v){
+				if(!in_array($k,array('id','password'))){
+					if(!empty($data)) $data .=" , ";
+					$this->settings->set_userdata($k,$v);
+				}
+			}
+			if(isset($fname) && isset($move))
+			$this->settings->set_userdata('avatar',$fname);
+			return 1;
+			}else{
+				$resp['error'] = $sql;
+				return json_encode($resp);
+			}
+
+	} 
+	
+}
+```
