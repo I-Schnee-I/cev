@@ -12,6 +12,7 @@ https://www.sourcecodester.com/php/15026/employee-and-visitor-gate-pass-logging-
 
 ## Description:
 System Employee and Guest Gate Pass Logging 1.0 is vulnerable to an unrestricted file upload attack via /employee_gatepass/classes/Users.php?f=ssave. This function does not impose restrictions on upload suffixes. A malicious actor could exploit this vulnerability to directly take over the target server. 
+
 Status: CRITICAL
 
 POC
